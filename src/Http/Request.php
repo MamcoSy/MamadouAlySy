@@ -43,7 +43,14 @@ class Request extends HttpMessage implements RequestInterface
         return $this->method;
     }
 
-    public function get(string $key)
+    public function get(string $key, $defaultValue)
     {
+        if (isset($_GET[$key])) {
+            return $_GET[$key];
+        } elseif (isset($_POST[$key])) {
+            return $_POST[$key];
+        } else {
+            return $defaultValue;
+        }
     }
 }

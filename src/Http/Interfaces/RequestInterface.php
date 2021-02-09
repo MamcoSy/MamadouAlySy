@@ -12,5 +12,5 @@ interface RequestInterface
 
     public function getMethod(): string;
 
-    public function get(string $key);
+    public function get(string $key, $defaultValue);
 }
