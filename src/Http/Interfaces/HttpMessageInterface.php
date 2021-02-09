@@ -6,5 +6,5 @@ namespace MamcoSy\Http\Interfaces;
 
 interface HttpMessageInterface
 {
-    public function getHeaders(): BagInterface;
+    public function getHeaders(): array;
 }
