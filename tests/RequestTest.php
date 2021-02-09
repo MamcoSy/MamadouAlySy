@@ -61,4 +61,18 @@ class RequestTest extends TestCase
         $this->assertNull($request->attributes->get('_action'));
         $this->assertFalse($request->attributes->has('_action'));
     }
+
+    public function testNewRequestFromGlobals()
+    {
+        $_SERVER['REQUEST_SCHEME'] = 'https';
+        $_SERVER['HTTP_HOST']      = 'google.com';
+        $_SERVER['REQUEST_URI']    = '/search';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_GET['name']              = 'Mamadou';
+        $request                   = Request::createFromGlobals();
+
+        $this->assertEquals('https://google.com', $request->getBaseUrl());
+        $this->assertEquals('/search', $request->getUri());
+        $this->assertEquals('Mamadou', $request->get('name'));
+    }
 }

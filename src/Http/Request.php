@@ -43,7 +43,7 @@ class Request extends HttpMessage implements RequestInterface
         return $this->method;
     }
 
-    public function get(string $key, $defaultValue)
+    public function get(string $key, $defaultValue = null)
     {
         if (isset($_GET[$key])) {
             return $_GET[$key];
@@ -52,5 +52,19 @@ class Request extends HttpMessage implements RequestInterface
         } else {
             return $defaultValue;
         }
+    }
+
+    public static function createFromGlobals():RequestInterface
+    {
+        $protocol = $_SERVER['REQUEST_SCHEME'] ?? 'http';
+        $hostname = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $baseUrl  = $protocol . '://' . $hostname;
+
+        return new self(
+            $baseUrl,
+            $_SERVER['REQUEST_URI'],
+            $_SERVER['REQUEST_METHOD'],
+            []
+        );
     }
 }
