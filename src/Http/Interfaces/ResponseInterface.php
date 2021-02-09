@@ -8,5 +8,11 @@ interface ResponseInterface
 {
     public function getBody(): string;
 
+    public function setBody(string $body): ResponseInterface;
+
     public function getStatusCode(): int;
+
+    public function setStatusCode(int $statusCode): ResponseInterface;
+
+    public function send():void;
 }
