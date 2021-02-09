@@ -7,12 +7,11 @@ namespace MamcoSy\Http;
 use MamcoSy\Http\Interfaces\BagInterface;
 use MamcoSy\Http\Interfaces\RequestInterface;
 
-class Request implements RequestInterface
+class Request extends HttpMessage implements RequestInterface
 {
     protected string $baseUrl;
     protected string $uri;
     protected string $method;
-    public BagInterface $headers;
     public BagInterface $attributes;
 
     public function __construct(
@@ -25,8 +24,8 @@ class Request implements RequestInterface
         $this->baseUrl     = $baseUrl;
         $this->uri         = $uri;
         $this->method      = $method;
-        $this->headers     = new Bag($headers);
         $this->attributes  = new Bag($attributes);
+        parent::__construct($headers);
     }
 
     public function getBaseUrl(): string
