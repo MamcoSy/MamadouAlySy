@@ -1,8 +1,12 @@
 <?php
 
-use MamcoSy\Router\Interfaces\RouteInterface;
+use MamcoSy\Http\Request;
 use MamcoSy\Router\Route;
+use PHPUnit\Framework\Test;
 use PHPUnit\Framework\TestCase;
+use Tests\Controllers\TestController;
+use MamcoSy\Router\Interfaces\RouteInterface;
+use MamcoSy\Http\Interfaces\ResponseInterface;
 
 class RouteTest extends TestCase
 {
@@ -29,5 +33,26 @@ class RouteTest extends TestCase
         $this->assertEquals(['TestController', 'index'], $route->getCallback());
         $this->assertEquals(['Auth', 'Admin'], $route->getMiddleware());
         $this->assertEquals(['id' => 7], $route->getParameters());
+    }
+
+    public function testRouteMatch()
+    {
+        $route   = new Route('/user/{int:id}/edit/{string:full-name}/{*:hash}/test');
+        $request = new Request('http://localhost', '/user/8/edit/MamadouAlySy/71az2z-z8z9z/test');
+
+        $this->assertTrue($route->match($request));
+    }
+
+    public function testRouteCall()
+    {
+        $request  = new Request();
+        $route    = new Route('/', [\Tests\Controllers\TestController::class, 'index']);
+
+        $this->assertTrue($route->match($request));
+
+        $response = $route->call();
+
+        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $this->assertEquals('hello', $response->getBody());
     }
 }

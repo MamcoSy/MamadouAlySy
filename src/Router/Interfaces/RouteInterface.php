@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MamcoSy\Router\Interfaces;
 
+use MamcoSy\Http\Interfaces\RequestInterface;
 use MamcoSy\Http\Interfaces\ResponseInterface;
 
 interface RouteInterface
@@ -30,5 +31,5 @@ interface RouteInterface
 
     public function call(): ResponseInterface;
 
-    public function match(ResponseInterface $request): bool;
+    public function match(RequestInterface $request): bool;
 }
