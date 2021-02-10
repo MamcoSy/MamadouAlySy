@@ -8,21 +8,25 @@ use MamcoSy\Http\Interfaces\ResponseInterface;
 
 interface RouteInterface
 {
-    public function getName(): string;
+    public function getName(): ?string;
 
-    public function getCallback(): callable;
+    public function getPath(): string;
 
-    public function getParameters(): array;
+    public function getCallback(): ?array;
 
-    public function getMiddleware(): array;
+    public function getParameters(): ?array;
 
-    public function setName(string $name): RouteInterface;
+    public function getMiddleware(): ?array;
 
-    public function setCallback(callable $callback): RouteInterface;
+    public function setName(?string $name): RouteInterface;
 
-    public function setParameters(array $parameters): RouteInterface;
+    public function setPath(string $path): RouteInterface;
 
-    public function setMiddleware(array $middleware): RouteInterface;
+    public function setCallback(?array $callback): RouteInterface;
+
+    public function setParameters(?array $parameters): RouteInterface;
+
+    public function setMiddleware(?array $middleware): RouteInterface;
 
     public function call(): ResponseInterface;
 
