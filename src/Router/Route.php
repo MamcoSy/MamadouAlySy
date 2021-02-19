@@ -98,11 +98,14 @@ class Route implements RouteInterface
 
     public function call(): ResponseInterface
     {
-        if (is_array($this->getCallback())) {
+        if (is_array($this->getCallback()))
+        {
             list($controller, $action) = $this->getCallback();
-            if (class_exists($controller)) {
-                $controllerObject = new $controller;
-                if (method_exists($controllerObject, $action)) {
+            if (class_exists($controller))
+            {
+                $controllerObject = new $controller();
+                if (method_exists($controllerObject, $action))
+                {
                     return call_user_func_array([$controllerObject, $action], $this->getParameters());
                 }
                 throw new RouteMethodNotFoundExecption('Invalid ' . $action . ' method in ' . $controller . ' class');
@@ -116,7 +119,9 @@ class Route implements RouteInterface
     {
         $pattern = $this->getPattern($this->getPath());
 
-        if (preg_match($pattern, $request->getUri(), $matches)) {
+        if (preg_match($pattern, $request->getUri(), $matches))
+        {
+            unset($matches[0]);
             $this->setParameters($matches);
 
             return true;
@@ -129,7 +134,8 @@ class Route implements RouteInterface
     {
         $pattern = '#^' . preg_replace('#\/#', '\/', $path) . '$#';
 
-        foreach (self::MAP_PATTERN as $map => $mapValue) {
+        foreach (self::MAP_PATTERN as $map => $mapValue)
+        {
             $pattern = preg_replace($map, $mapValue, $pattern);
         }
 
