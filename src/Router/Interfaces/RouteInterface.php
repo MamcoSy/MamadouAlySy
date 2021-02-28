@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare ( strict_types = 1 );
 
 namespace MamcoSy\Router\Interfaces;
 
@@ -17,19 +17,19 @@ interface RouteInterface
 
     public function getParameters(): ?array;
 
-    public function getMiddleware(): ?array;
+    public function getMiddleware(): ?string;
 
-    public function setName(?string $name): RouteInterface;
+    public function setName( ?string $name ): RouteInterface;
 
-    public function setPath(string $path): RouteInterface;
+    public function setPath( string $path ): RouteInterface;
 
-    public function setCallback(?array $callback): RouteInterface;
+    public function setCallback( ?array $callback ): RouteInterface;
 
-    public function setParameters(?array $parameters): RouteInterface;
+    public function setParameters( ?array $parameters ): RouteInterface;
 
-    public function setMiddleware(?array $middleware): RouteInterface;
+    public function setMiddleware( ?string $middleware ): RouteInterface;
 
     public function call(): ResponseInterface;
 
-    public function match(RequestInterface $request): bool;
+    public function match( RequestInterface $request ): bool;
 }

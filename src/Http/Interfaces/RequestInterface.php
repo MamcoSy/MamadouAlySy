@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare ( strict_types = 1 );
 
 namespace MamcoSy\Http\Interfaces;
 
@@ -12,7 +12,7 @@ interface RequestInterface
 
     public function getMethod(): string;
 
-    public function get(string $key, $defaultValue = null);
+    public function get( string $key, $defaultValue = null );
 
     public static function createFromGlobals(): RequestInterface;
 }

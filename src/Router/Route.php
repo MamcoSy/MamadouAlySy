@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare ( strict_types = 1 );
 
 namespace MamcoSy\Router;
 
@@ -13,116 +13,187 @@ use MamcoSy\Router\Exceptions\RouteInvalidCallbackException;
 
 class Route implements RouteInterface
 {
-    protected ?string $name;
+    protected  ? string $name;
     protected string $path;
-    protected ?array $callback;
-    protected ?array $parameters = null;
-    protected ?array $middleware;
+    protected  ? array $callback;
+    protected  ? array $parameters = null;
+    protected  ? string $middleware;
     const MAP_PATTERN = [
         '#{int:([a-zA-Z\-]+)}#'    => '([0-9]+)',
         '#{string:([a-zA-Z\-]+)}#' => '([a-zA-Z]+)',
-        '#{\*:([a-zA-Z\-]+)}#'     => '([0-9a-zA-Z\-]+)'
+        '#{\*:([a-zA-Z\-]+)}#'     => '([0-9a-zA-Z\-]+)',
     ];
 
+    /**
+     * @param string     $path
+     * @param array      $callback
+     * @param array      $middleware
+     * @param nullstring $name
+     */
     public function __construct(
         string $path = '',
-        ?array $callback = null,
-        ?array $middleware = null,
-        ?string $name = null
+            ?array $callback = null,
+            ?string $middleware = null,
+            ?string $name = null
     ) {
-        $this->path       = $path == '' || $path == '/' ? '/' : rtrim($path, '/');
+        $this->path = $path == '' || $path == '/' ? '/' : rtrim( $path,
+            '/' );
         $this->callback   = $callback;
         $this->middleware = $middleware;
         $this->name       = $name;
     }
 
-    public function getName(): ?string
+    /**
+     * @return mixed
+     */
+    public function getName() : ?string
     {
         return $this->name;
     }
 
-    public function getPath(): string
+    /**
+     * @return mixed
+     */
+    public function getPath() : string
     {
         return $this->path;
     }
 
-    public function getCallback(): ?array
+    /**
+     * @return mixed
+     */
+    public function getCallback() : ?array
     {
         return $this->callback;
     }
 
-    public function getParameters(): ?array
+    /**
+     * @return mixed
+     */
+    public function getParameters() : ?array
     {
         return $this->parameters;
     }
 
-    public function getMiddleware(): ?array
+    /**
+     * @return string
+     */
+    public function getMiddleware(): ?string
     {
         return $this->middleware;
     }
 
-    public function setName(?string $name): RouteInterface
+    /**
+     * @param  string  $name
+     * @return mixed
+     */
+    public function setName( ?string $name ): RouteInterface
     {
         $this->name = $name;
 
         return $this;
     }
 
-    public function setPath(string $path): RouteInterface
+    /**
+     * @param  string  $path
+     * @return mixed
+     */
+    public function setPath( string $path ): RouteInterface
     {
-        $this->path = rtrim($path, '/');
+        $this->path = rtrim( $path, '/' );
 
         return $this;
     }
 
-    public function setCallback(?array $callback): RouteInterface
+    /**
+     * @param  array   $callback
+     * @return mixed
+     */
+    public function setCallback( ?array $callback ): RouteInterface
     {
         $this->callback = $callback;
 
         return $this;
     }
 
-    public function setParameters(?array $parameters): RouteInterface
+    /**
+     * @param  array   $parameters
+     * @return mixed
+     */
+    public function setParameters( ?array $parameters ): RouteInterface
     {
         $this->parameters = $parameters;
 
         return $this;
     }
 
-    public function setMiddleware(?array $middleware): RouteInterface
+    /**
+     * @param  string $middleware
+     * @return self
+     */
+    public function setMiddleware( ?string $middleware ): RouteInterface
     {
         $this->middleware = $middleware;
 
         return $this;
     }
 
+    /**
+     * @return mixed
+     */
     public function call(): ResponseInterface
     {
-        if (is_array($this->getCallback()))
-        {
-            list($controller, $action) = $this->getCallback();
-            if (class_exists($controller))
-            {
-                $controllerObject = new $controller();
-                if (method_exists($controllerObject, $action))
-                {
-                    return call_user_func_array([$controllerObject, $action], $this->getParameters());
-                }
-                throw new RouteMethodNotFoundExecption('Invalid ' . $action . ' method in ' . $controller . ' class');
-            }
-            throw new RouteClassNotFoundException('Invalid ' . $controller . ' class');
+
+        if ( ! is_null( $this->middleware ) ) {
+            return $this->getResponse( [$this->getMiddleware(), 'handle'] );
         }
-        throw new RouteInvalidCallbackException('Invlid callback !');
+
+        return $this->getResponse( $this->getCallback() );
     }
 
-    public function match(RequestInterface $request): bool
+    /**
+     * @param array $data
+     */
+    private function getResponse( array $data ): ResponseInterface
     {
-        $pattern = $this->getPattern($this->getPath());
 
-        if (preg_match($pattern, $request->getUri(), $matches))
-        {
-            unset($matches[0]);
-            $this->setParameters($matches);
+        if ( is_array( $data ) ) {
+            list( $controller, $action ) = $data;
+
+            if ( class_exists( $controller ) ) {
+                $controllerObject = new $controller();
+
+                if ( method_exists( $controllerObject, $action ) ) {
+                    return call_user_func_array(
+                        [$controllerObject, $action],
+                        $this->getParameters()
+                    );
+                }
+
+                throw new RouteMethodNotFoundExecption(
+                    'Invalid ' . $action . ' method in ' . $controller .
+                    ' class'
+                );
+            }
+
+            throw new RouteClassNotFoundException(
+                'Invalid ' . $controller . ' class'
+            );
+        }
+
+        throw new RouteInvalidCallbackException( 'Invlid callback !' );
+    }
+
+    /**
+     * @param RequestInterface $request
+     */
+    public function match( RequestInterface $request ): bool
+    {
+        $pattern = $this->getPattern( $this->getPath() );
+
+        if ( preg_match( $pattern, $request->getUri(), $matches ) ) {
+            unset( $matches[0] );
+            $this->setParameters( $matches );
 
             return true;
         }
@@ -130,15 +201,19 @@ class Route implements RouteInterface
         return false;
     }
 
-    private function getPattern(string $path)
+    /**
+     * @param  string  $path
+     * @return mixed
+     */
+    private function getPattern( string $path )
     {
-        $pattern = '#^' . preg_replace('#\/#', '\/', $path) . '$#';
+        $pattern = '#^' . preg_replace( '#\/#', '\/', $path ) . '$#';
 
-        foreach (self::MAP_PATTERN as $map => $mapValue)
-        {
-            $pattern = preg_replace($map, $mapValue, $pattern);
+        foreach ( self::MAP_PATTERN as $map => $mapValue ) {
+            $pattern = preg_replace( $map, $mapValue, $pattern );
         }
 
-        return  $pattern;
+        return $pattern;
     }
+
 }

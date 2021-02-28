@@ -11,18 +11,25 @@ class RouterTest extends TestCase
     public function testRouterAdd()
     {
         $request1 = new Request();
-        $request2 = new Request('http://localhost', '/test');
+        $request2 = new Request( 'http://localhost', '/test' );
 
-        Router::add('GET', new Route('/', [\Tests\Controllers\TextController::class, 'index']));
+        Router::add( 'GET', new Route( '/',
+            [\Tests\Controllers\TextController::class, 'index'] ) );
 
-        $this->assertInstanceOf(RouteInterface::class, Router::dispatch($request1));
-        $this->assertNull(Router::dispatch($request2));
+        $this->assertInstanceOf(
+            RouteInterface::class,
+            Router::dispatch( $request1 )
+        );
+        $this->assertNull( Router::dispatch( $request2 ) );
     }
 
     public function testRouterGet()
     {
-        $request = new Request('http://localhost', '/test');
-        Router::get('/test', '\Tests\Controllers\TextController@index');
-        $this->assertInstanceOf(RouteInterface::class, Router::dispatch($request));
+        $request = new Request( 'http://localhost', '/test' );
+        Router::get( '/test', '\Tests\Controllers\TextController@index' );
+        $this->assertInstanceOf(
+            RouteInterface::class,
+            Router::dispatch( $request )
+        );
     }
 }

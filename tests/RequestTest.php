@@ -11,12 +11,12 @@ class RequestTest extends TestCase
     {
         $request = new Request();
 
-        $this->assertInstanceOf(RequestInterface::class, $request);
-        $this->assertEquals('http://localhost', $request->getBaseUrl());
-        $this->assertEquals('/', $request->getUri());
-        $this->assertEquals('GET', $request->getMethod());
-        $this->assertInstanceOf(BagInterface::class, $request->headers);
-        $this->assertEmpty($request->headers->all());
+        $this->assertInstanceOf( RequestInterface::class, $request );
+        $this->assertEquals( 'http://localhost', $request->getBaseUrl() );
+        $this->assertEquals( '/', $request->getUri() );
+        $this->assertEquals( 'GET', $request->getMethod() );
+        $this->assertInstanceOf( BagInterface::class, $request->headers );
+        $this->assertEmpty( $request->headers->all() );
     }
 
     public function testNewRequestWithHeaders()
@@ -27,14 +27,15 @@ class RequestTest extends TestCase
             'GET',
             ['Content-Type' => 'text/html']
         );
-        $this->assertNotEmpty($request->headers->all());
-        $this->assertTrue($request->headers->has('content-type'));
-        $this->assertEquals('text/html', $request->headers->get('content-type'));
+        $this->assertNotEmpty( $request->headers->all() );
+        $this->assertTrue( $request->headers->has( 'content-type' ) );
+        $this->assertEquals( 'text/html', $request->headers
+                                                     ->get( 'content-type' ) );
 
-        $request->headers->remove('content-type');
+        $request->headers->remove( 'content-type' );
 
-        $this->assertNull($request->headers->get('content-type'));
-        $this->assertFalse($request->headers->has('content-type'));
+        $this->assertNull( $request->headers->get( 'content-type' ) );
+        $this->assertFalse( $request->headers->has( 'content-type' ) );
     }
 
     public function testNewRequestWithAttributes()
@@ -44,22 +45,24 @@ class RequestTest extends TestCase
             '/',
             'GET',
             ['Content-Type' => 'text/html'],
-            ['_controller'  => 'TextController', '_action' => 'index']
+            ['_controller' => 'TextController', '_action' => 'index']
         );
-        $this->assertNotEmpty($request->attributes->all());
-        $this->assertTrue($request->attributes->has('_controller'));
-        $this->assertTrue($request->attributes->has('_action'));
+        $this->assertNotEmpty( $request->attributes->all() );
+        $this->assertTrue( $request->attributes->has( '_controller' ) );
+        $this->assertTrue( $request->attributes->has( '_action' ) );
 
-        $this->assertEquals('TextController', $request->attributes->get('_controller'));
-        $this->assertEquals('index', $request->attributes->get('_action'));
+        $this->assertEquals( 'TextController', $request->attributes
+                                                          ->get( '_controller'
+                                                                           ) );
+        $this->assertEquals( 'index', $request->attributes->get( '_action' ) );
 
-        $request->attributes->remove('_controller');
-        $request->attributes->remove('_action');
+        $request->attributes->remove( '_controller' );
+        $request->attributes->remove( '_action' );
 
-        $this->assertNull($request->attributes->get('_controller'));
-        $this->assertFalse($request->attributes->has('_controller'));
-        $this->assertNull($request->attributes->get('_action'));
-        $this->assertFalse($request->attributes->has('_action'));
+        $this->assertNull( $request->attributes->get( '_controller' ) );
+        $this->assertFalse( $request->attributes->has( '_controller' ) );
+        $this->assertNull( $request->attributes->get( '_action' ) );
+        $this->assertFalse( $request->attributes->has( '_action' ) );
     }
 
     public function testNewRequestFromGlobals()
@@ -71,8 +74,8 @@ class RequestTest extends TestCase
         $_GET['name']              = 'Mamadou';
         $request                   = Request::createFromGlobals();
 
-        $this->assertEquals('https://google.com', $request->getBaseUrl());
-        $this->assertEquals('/search', $request->getUri());
-        $this->assertEquals('Mamadou', $request->get('name'));
+        $this->assertEquals( 'https://google.com', $request->getBaseUrl() );
+        $this->assertEquals( '/search', $request->getUri() );
+        $this->assertEquals( 'Mamadou', $request->get( 'name' ) );
     }
 }
