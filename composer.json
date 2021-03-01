@@ -1,12 +1,27 @@
 {
   "description": "",
   "name": "mamadou/mamadou-aly-sy",
-  "authors": [{
-    "name": "Mamadou Aly Sy",
-    "email": "mamco.aly.sy@gmail.com"
-  }],
+  "authors": [
+    {
+      "name": "Mamadou Aly Sy",
+      "email": "mamco.aly.sy@gmail.com"
+    }
+  ],
   "require": {
-    "phpunit/phpunit": "^9.5"
+    "php": ">=7.4",
+    "symfony/yaml": "^5.2",
+    "ext-pdo": "*",
+    "ext-json": "*",
+    "ext-imap": "*",
+    "ext-mbstring": "*",
+    "ext-xml": "*",
+    "ext-bcmath": "*",
+    "ext-intl": "*",
+    "ext-sqlite3": "*",
+    "ext-curl": "*",
+    "ext-mysql": "*",
+    "ext-gd": "*",
+    "ext-zip": "*"
   },
   "autoload": {
     "psr-4": {
@@ -19,6 +34,7 @@
     }
   },
   "require-dev": {
-    "spatie/phpunit-watcher": "^1.23"
+    "spatie/phpunit-watcher": "^1.23",
+    "phpunit/phpunit": "^9.5"
   }
 }
