@@ -4,12 +4,14 @@ declare ( strict_types = 1 );
 
 namespace MamcoSy\Router;
 
+use MamcoSy\Middleware\MiddlewareInterface;
 use MamcoSy\Http\Interfaces\RequestInterface;
 use MamcoSy\Router\Interfaces\RouteInterface;
 use MamcoSy\Http\Interfaces\ResponseInterface;
 use MamcoSy\Router\Exceptions\RouteClassNotFoundException;
 use MamcoSy\Router\Exceptions\RouteMethodNotFoundExecption;
 use MamcoSy\Router\Exceptions\RouteInvalidCallbackException;
+use MamcoSy\Router\Exceptions\RouteInvalidMiddlewareException;
 
 class Route implements RouteInterface
 {
@@ -17,7 +19,7 @@ class Route implements RouteInterface
     protected string $path;
     protected  ? array $callback;
     protected  ? array $parameters = null;
-    protected  ? string $middleware;
+    protected  ? array $middleware;
     const MAP_PATTERN = [
         '#{int:([a-zA-Z\-]+)}#'    => '([0-9]+)',
         '#{string:([a-zA-Z\-]+)}#' => '([a-zA-Z]+)',
@@ -25,26 +27,25 @@ class Route implements RouteInterface
     ];
 
     /**
-     * @param string     $path
-     * @param array      $callback
-     * @param array      $middleware
-     * @param nullstring $name
+     * @param string      $path
+     * @param null|array  $callback
+     * @param null|array  $middleware
+     * @param null|string $name
      */
     public function __construct(
         string $path = '',
             ?array $callback = null,
-            ?string $middleware = null,
+            ?array $middleware = null,
             ?string $name = null
     ) {
-        $this->path = $path == '' || $path == '/' ? '/' : rtrim( $path,
-            '/' );
+        $this->path       = '/' . trim( $path, '/' );
         $this->callback   = $callback;
         $this->middleware = $middleware;
         $this->name       = $name;
     }
 
     /**
-     * @return mixed
+     * @inheritDoc
      */
     public function getName() : ?string
     {
@@ -52,7 +53,7 @@ class Route implements RouteInterface
     }
 
     /**
-     * @return mixed
+     * @inheritDoc
      */
     public function getPath() : string
     {
@@ -60,7 +61,7 @@ class Route implements RouteInterface
     }
 
     /**
-     * @return mixed
+     * @inheritDoc
      */
     public function getCallback() : ?array
     {
@@ -68,7 +69,7 @@ class Route implements RouteInterface
     }
 
     /**
-     * @return mixed
+     * @inheritDoc
      */
     public function getParameters() : ?array
     {
@@ -76,16 +77,15 @@ class Route implements RouteInterface
     }
 
     /**
-     * @return string
+     * @inheritDoc
      */
-    public function getMiddleware(): ?string
+    public function getMiddleware(): ?array
     {
         return $this->middleware;
     }
 
     /**
-     * @param  string  $name
-     * @return mixed
+     * @inheritDoc
      */
     public function setName( ?string $name ): RouteInterface
     {
@@ -95,8 +95,7 @@ class Route implements RouteInterface
     }
 
     /**
-     * @param  string  $path
-     * @return mixed
+     * @inheritDoc
      */
     public function setPath( string $path ): RouteInterface
     {
@@ -106,8 +105,7 @@ class Route implements RouteInterface
     }
 
     /**
-     * @param  array   $callback
-     * @return mixed
+     * @inheritDoc
      */
     public function setCallback( ?array $callback ): RouteInterface
     {
@@ -117,8 +115,7 @@ class Route implements RouteInterface
     }
 
     /**
-     * @param  array   $parameters
-     * @return mixed
+     * @inheritDoc
      */
     public function setParameters( ?array $parameters ): RouteInterface
     {
@@ -128,10 +125,9 @@ class Route implements RouteInterface
     }
 
     /**
-     * @param  string $middleware
-     * @return self
+     * @inheritDoc
      */
-    public function setMiddleware( ?string $middleware ): RouteInterface
+    public function setMiddleware( ?array $middleware ): RouteInterface
     {
         $this->middleware = $middleware;
 
@@ -139,31 +135,60 @@ class Route implements RouteInterface
     }
 
     /**
-     * @return mixed
+     * @param array $callback
      */
-    public function call(): ResponseInterface
+    private function executeMiddleware( ?array $callback ): ResponseInterface
     {
 
-        if ( ! is_null( $this->middleware ) ) {
-            return $this->getResponse( [$this->getMiddleware(), 'handle'] );
+        foreach ( $this->middleware as $middleware ) {
+
+            if ( class_exists( $middleware ) ) {
+                $middleware = new $middleware();
+
+                if ( $middleware instanceof MiddlewareInterface ) {
+                    $middlewareIsPassed = call_user_func(
+                        [$middleware, 'test']
+                    );
+
+                    if ( ! $middlewareIsPassed ) {
+                        return call_user_func(
+                            [$middleware, 'handle']
+                        );
+                    }
+
+                }
+
+                throw new RouteInvalidMiddlewareException(
+                    "
+                        Invlid Middleware: {$middleware}
+                        does not implement MiddlewareInterface
+                    "
+                );
+            }
+
+            throw new RouteInvalidMiddlewareException(
+                "Invlid Middleware: {$middleware} does not exists"
+            );
+
         }
 
-        return $this->getResponse( $this->getCallback() );
+        $this->_invoke( $this->callback );
     }
 
     /**
-     * @param array $data
+     * @param array $callback
      */
-    private function getResponse( array $data ): ResponseInterface
+    private function _invoke( array $callback ): ResponseInterface
     {
 
-        if ( is_array( $data ) ) {
-            list( $controller, $action ) = $data;
+        if ( is_array( $callback ) ) {
+            list( $controller, $action ) = $callback;
 
             if ( class_exists( $controller ) ) {
                 $controllerObject = new $controller();
 
                 if ( method_exists( $controllerObject, $action ) ) {
+
                     return call_user_func_array(
                         [$controllerObject, $action],
                         $this->getParameters()
@@ -185,7 +210,20 @@ class Route implements RouteInterface
     }
 
     /**
-     * @param RequestInterface $request
+     * @inheritDoc
+     */
+    public function call(): ResponseInterface
+    {
+
+        if ( ! empty( $this->middleware ) ) {
+            return $this->executeMiddleware( $this->middleware );
+        }
+
+        return $this->_invoke( $this->callback );
+    }
+
+    /**
+     * @inheritDoc
      */
     public function match( RequestInterface $request ): bool
     {
@@ -202,6 +240,7 @@ class Route implements RouteInterface
     }
 
     /**
+     * Generating the regex pattern
      * @param  string  $path
      * @return mixed
      */

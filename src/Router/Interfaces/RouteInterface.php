@@ -9,27 +9,93 @@ use MamcoSy\Http\Interfaces\ResponseInterface;
 
 interface RouteInterface
 {
+    /**
+     * Returns the route name
+     *
+     * @return string|null
+     */
     public function getName(): ?string;
 
+    /**
+     * Returns the route path
+     *
+     * @return string
+     */
     public function getPath(): string;
 
+    /**
+     * Returns the route callback
+     *
+     * @return array|null
+     */
     public function getCallback(): ?array;
 
+    /**
+     * Returns the route parameters
+     *
+     * @return array|null
+     */
     public function getParameters(): ?array;
 
-    public function getMiddleware(): ?string;
+    /**
+     * Returns the route middleware
+     *
+     * @return array|null
+     */
+    public function getMiddleware(): ?array;
 
-    public function setName( ?string $name ): RouteInterface;
+    /**
+     * Setting the route name
+     *
+     * @param  string|null $name
+     * @return self
+     */
+    public function setName( ?string $name ): self;
 
-    public function setPath( string $path ): RouteInterface;
+    /**
+     * Setting the route
+     *
+     * @param  string $path
+     * @return self
+     */
+    public function setPath( string $path ): self;
 
-    public function setCallback( ?array $callback ): RouteInterface;
+    /**
+     * Setting the route callback
+     *
+     * @param  array|null $callback
+     * @return self
+     */
+    public function setCallback( ?array $callback ): self;
 
-    public function setParameters( ?array $parameters ): RouteInterface;
+    /**
+     * Setting the route parameters
+     *
+     * @param  array|null $parameters
+     * @return self
+     */
+    public function setParameters( ?array $parameters ): self;
 
-    public function setMiddleware( ?string $middleware ): RouteInterface;
+    /**
+     * Setting the route middleware
+     *
+     * @param  string|null $middleware
+     * @return self
+     */
+    public function setMiddleware( ?array $middleware ): self;
 
+    /**
+     * Call the route
+     *
+     * @return ResponseInterface
+     */
     public function call(): ResponseInterface;
 
+    /**
+     * Check if route match the given url
+     *
+     * @param  RequestInterface $request
+     * @return boolean
+     */
     public function match( RequestInterface $request ): bool;
 }

@@ -23,7 +23,7 @@ class RouteTest extends TestCase
         $route
             ->setPath( '/test/' )
             ->setCallback( ['TestController', 'index'] )
-            ->setMiddleware( 'Admin' )
+            ->setMiddleware( ['Admin'] )
             ->setName( 'test' )
             ->setParameters( ['id' => 7] );
 
@@ -33,7 +33,7 @@ class RouteTest extends TestCase
             ['TestController', 'index'],
             $route->getCallback()
         );
-        $this->assertEquals( 'Admin', $route->getMiddleware() );
+        $this->assertEquals( ['Admin'], $route->getMiddleware() );
         $this->assertEquals( ['id' => 7], $route->getParameters() );
     }
 
@@ -69,7 +69,7 @@ class RouteTest extends TestCase
         $route   = new Route(
             '/',
             [\Tests\Controllers\TestController::class, 'index'],
-            \Tests\Middlewares\TestMiddleware::class
+            [\Tests\Middlewares\TestMiddleware::class]
         );
 
         $this->assertTrue( $route->match( $request ) );
