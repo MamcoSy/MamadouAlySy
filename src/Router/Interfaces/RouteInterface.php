@@ -38,13 +38,6 @@ interface RouteInterface
     public function getParameters(): ?array;
 
     /**
-     * Returns the route middleware
-     *
-     * @return array|null
-     */
-    public function getMiddleware(): ?array;
-
-    /**
      * Setting the route name
      *
      * @param  string|null $name
@@ -75,14 +68,6 @@ interface RouteInterface
      * @return self
      */
     public function setParameters( ?array $parameters ): self;
-
-    /**
-     * Setting the route middleware
-     *
-     * @param  string|null $middleware
-     * @return self
-     */
-    public function setMiddleware( ?array $middleware ): self;
 
     /**
      * Call the route

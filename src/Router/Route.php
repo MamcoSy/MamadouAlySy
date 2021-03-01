@@ -4,14 +4,12 @@ declare ( strict_types = 1 );
 
 namespace MamcoSy\Router;
 
-use MamcoSy\Middleware\MiddlewareInterface;
 use MamcoSy\Http\Interfaces\RequestInterface;
 use MamcoSy\Router\Interfaces\RouteInterface;
 use MamcoSy\Http\Interfaces\ResponseInterface;
 use MamcoSy\Router\Exceptions\RouteClassNotFoundException;
 use MamcoSy\Router\Exceptions\RouteMethodNotFoundExecption;
 use MamcoSy\Router\Exceptions\RouteInvalidCallbackException;
-use MamcoSy\Router\Exceptions\RouteInvalidMiddlewareException;
 
 class Route implements RouteInterface
 {
@@ -19,7 +17,7 @@ class Route implements RouteInterface
     protected string $path;
     protected  ? array $callback;
     protected  ? array $parameters = null;
-    protected  ? array $middleware;
+
     const MAP_PATTERN = [
         '#{int:([a-zA-Z\-]+)}#'    => '([0-9]+)',
         '#{string:([a-zA-Z\-]+)}#' => '([a-zA-Z]+)',
@@ -35,13 +33,13 @@ class Route implements RouteInterface
     public function __construct(
         string $path = '',
             ?array $callback = null,
-            ?array $middleware = null,
             ?string $name = null
     ) {
-        $this->path       = '/' . trim( $path, '/' );
-        $this->callback   = $callback;
-        $this->middleware = $middleware;
-        $this->name       = $name;
+        $this
+            ->setPath( $path )
+            ->setCallback( $callback )
+            ->setName( $name )
+        ;
     }
 
     /**
@@ -71,17 +69,9 @@ class Route implements RouteInterface
     /**
      * @inheritDoc
      */
-    public function getParameters() : ?array
+    public function getParameters(): ?array
     {
         return $this->parameters;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getMiddleware(): ?array
-    {
-        return $this->middleware;
     }
 
     /**
@@ -99,7 +89,7 @@ class Route implements RouteInterface
      */
     public function setPath( string $path ): RouteInterface
     {
-        $this->path = rtrim( $path, '/' );
+        $this->path = '/' . trim( $path, '/' );
 
         return $this;
     }
@@ -122,57 +112,6 @@ class Route implements RouteInterface
         $this->parameters = $parameters;
 
         return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setMiddleware( ?array $middleware ): RouteInterface
-    {
-        $this->middleware = $middleware;
-
-        return $this;
-    }
-
-    /**
-     * @param array $callback
-     */
-    private function executeMiddleware( ?array $callback ): ResponseInterface
-    {
-
-        foreach ( $this->middleware as $middleware ) {
-
-            if ( class_exists( $middleware ) ) {
-                $middleware = new $middleware();
-
-                if ( $middleware instanceof MiddlewareInterface ) {
-                    $middlewareIsPassed = call_user_func(
-                        [$middleware, 'test']
-                    );
-
-                    if ( ! $middlewareIsPassed ) {
-                        return call_user_func(
-                            [$middleware, 'handle']
-                        );
-                    }
-
-                }
-
-                throw new RouteInvalidMiddlewareException(
-                    "
-                        Invlid Middleware: {$middleware}
-                        does not implement MiddlewareInterface
-                    "
-                );
-            }
-
-            throw new RouteInvalidMiddlewareException(
-                "Invlid Middleware: {$middleware} does not exists"
-            );
-
-        }
-
-        $this->_invoke( $this->callback );
     }
 
     /**
@@ -214,11 +153,6 @@ class Route implements RouteInterface
      */
     public function call(): ResponseInterface
     {
-
-        if ( ! empty( $this->middleware ) ) {
-            return $this->executeMiddleware( $this->middleware );
-        }
-
         return $this->_invoke( $this->callback );
     }
 
